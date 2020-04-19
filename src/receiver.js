@@ -17,7 +17,8 @@ const httpServer = http.createServer((request, response) => {
         // Check if there is enough space to receive the file
         // TODO we need to know where we are saving the file first
         const size = data.size
-        const disks = nodeDiskInfo.getDiskInfoSync();
+
+        let filePath = saveFolder + '/' + name
 
         // Create the server that will listen for the incoming file
         const server = net.createServer()
@@ -25,8 +26,7 @@ const httpServer = http.createServer((request, response) => {
         // Write on file received data
         server.on('connection', socket => {
             // saveFolder is a global variable defined in logic.js
-            // TODO this very likely won't work on windows
-            let fileStream = fs.createWriteStream(saveFolder + '/' + name);
+            let fileStream = fs.createWriteStream(filePath);
             let progressChecker = null
             fileStream.on('ready', () => {
                 socket.pipe(fileStream);
@@ -37,7 +37,8 @@ const httpServer = http.createServer((request, response) => {
                     console.log(progress)
                 }, 200, fileStream)
             })
-
+            
+            // Close server when file is sent
             socket.on('end', () => {
                 clearInterval(progressChecker)
                 server.close(() => { });
@@ -49,7 +50,6 @@ const httpServer = http.createServer((request, response) => {
         })
 
         server.listen({
-            host: 'localhost',
             port: 0
         }, () => {
             // When the server is initialized
@@ -71,7 +71,6 @@ const httpServer = http.createServer((request, response) => {
 
 // Bind HTTP server to a know port
 httpServer.listen({
-    host: 'localhost',
     port: 11861
 }, () => {
     console.log("HTTP server launched")

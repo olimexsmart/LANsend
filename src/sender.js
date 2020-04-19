@@ -10,7 +10,7 @@ function sendFile(IP, fileName) {
 
   // Create HTTP POST request
   const httpClient = http.request({
-    host: 'localhost',
+    host: IP,
     port: 11861,
     method: 'POST',
     headers: {
@@ -26,7 +26,7 @@ function sendFile(IP, fileName) {
     })
     response.on('end', () => {
       body = Buffer.concat(body).toString()
-      const socket = net.connect(parseInt(body), 'localhost')
+      const socket = net.connect(parseInt(body), IP)
 
       socket.on('error', error => {
         console.log(error)

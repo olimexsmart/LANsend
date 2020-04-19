@@ -10,6 +10,8 @@ console.log("bomber")
 
 // Used in other files too
 var saveFolder = ""
+var freeDiskSpace = 0
+var progress
 
 document.addEventListener('DOMContentLoaded', function () {
     const fileManagerBtn = document.getElementById('openFile')
@@ -20,9 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var openFilesResult = []
 
-
-
-    // Check if this works on windows
+    // Magically it works also on windows
     saveFolder = downloadsFolder() + '/LANsend'
     if (!fs.existsSync(saveFolder)) {
         fs.mkdirSync(saveFolder);
@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
     sendBtn.addEventListener('click', () => {
         const IP = IPInput.value
         if (net.isIPv4(IP)) {
-            // TODO check IP validity
             openFilesResult.forEach(fileName => {
                 sendFile(IP, fileName)
             })
@@ -81,5 +80,21 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     // Check IP the first time manually
     IPInput.dispatchEvent(new Event('keyup'))
+
+    // Update available disk space
+    setInterval(() => {
+        nodeDiskInfo.getDiskInfo()
+            .then(disks => {
+                for (let d = 0; d < disks.length; d++) {
+                    const element = disks[d];
+                    if (saveFolder[0] == disks[d].mounted[0]) {
+                        freeDiskSpace = disks[d].available
+                    }
+                }
+            })
+            .catch(reason => {
+                console.error(reason);
+            })
+    }, 1000)
 
 }, false);
