@@ -24,7 +24,9 @@ const httpServer = http.createServer((request, response) => {
 
         // Write on file received data
         server.on('connection', socket => {
-            let fileStream = fs.createWriteStream(name);
+            // saveFolder is a global variable defined in logic.js
+            // TODO this very likely won't work on windows
+            let fileStream = fs.createWriteStream(saveFolder + '/' + name);
             let progressChecker = null
             fileStream.on('ready', () => {
                 socket.pipe(fileStream);
