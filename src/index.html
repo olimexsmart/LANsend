@@ -12,18 +12,31 @@
 </head>
 
 <body>
-  <p>Select file</p>
-  <input id="destIP" type="text" value="127.0.0.1">
+  <p id="yourIP"></p>
+  <hr>
+  <label for="destIP">Destination IP:</label>
+  <input id="destIP" type="text" value="192.168.1.x">
+  <br>
   <button id="openFile">
-    Open
+    Open Files
   </button>
+  <label for="openFile" id="filesOpened"></label>
+  <p></p>
   <button id="send">
     Send
   </button>
+  <hr>
   <p id="savePath"></p>
   <button id="selectFolder">
     Select
   </button>
+  <button id="showFolder">Show Folder</button>
+  <!-- <hr>
+  <p id="status">Status UP: 0.0 MB/s DOWN: 0.0 MB/s</p>
+  <p class="hidden" id="receiving"></p>
+  <progess class="hidden" id="recProgress"></progess>
+  <p class="hidden" id="sending"></p>
+  <progess class="hidden" id="senProgress"></progess> -->
 </body>
 
 </html>

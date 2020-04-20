@@ -40,6 +40,11 @@ function sendFile(IP, fileName) {
         // This just pipes the read stream to the socket, closing it too
         fileStream.pipe(socket);
       });
+
+      // Socket closed automagically upon receiving FIN
+      socket.on('close', () => {
+        console.log("Socket closed")
+      })
     })
   })
 

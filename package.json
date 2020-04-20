@@ -47,7 +47,9 @@
   "dependencies": {
     "downloads-folder": "^1.0.2",
     "electron-squirrel-startup": "^1.0.0",
-    "node-disk-info": "^1.0.4"
+    "ip": "^1.1.5",
+    "node-disk-info": "^1.0.4",
+    "open-file-explorer": "^1.0.2"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.50",

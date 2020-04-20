@@ -5,6 +5,9 @@ var path = require('path');
 const nodeDiskInfo = require('node-disk-info'); //=> Use this when install as a dependency
 const { dialog } = require('electron').remote
 const downloadsFolder = require('downloads-folder');
+const ipUtils = require('ip');
+const openExplorer = require('open-file-explorer');
+
 
 console.log("bomber")
 
@@ -13,21 +16,31 @@ var saveFolder = ""
 var freeDiskSpace = 0
 var progress
 
+var nReceiving = 0
+var nSending = 0
+
 document.addEventListener('DOMContentLoaded', function () {
     const fileManagerBtn = document.getElementById('openFile')
     const sendBtn = document.getElementById('send')
     const IPInput = document.getElementById('destIP')
     const pathP = document.getElementById('savePath')
     const selectBtn = document.getElementById('selectFolder')
+    const yourIPP = document.getElementById('yourIP')
+    const showFolderBtn = document.getElementById('showFolder')
+    const filesOpenedP = document.getElementById('filesOpened')
+
 
     var openFilesResult = []
+
+    // Update IP address of this machine
+    yourIPP.innerText = "Your IP is: " + ipUtils.address()
 
     // Magically it works also on windows
     saveFolder = downloadsFolder() + '/LANsend'
     if (!fs.existsSync(saveFolder)) {
         fs.mkdirSync(saveFolder);
     }
-    pathP.innerText = saveFolder
+    pathP.innerText = "Saving in: " + saveFolder
 
     // Select different saving folder
     selectBtn.addEventListener('click', () => {
@@ -36,10 +49,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }).then(result => {
             if (!result.canceled) {
                 saveFolder = result.filePaths
-                pathP.innerText = saveFolder
+                pathP.innerText = "Saving in: " + saveFolder
             }
         }).catch(err => {
             console.log(err)
+        })
+    })
+
+    // Open in explorer saving folder
+    showFolderBtn.addEventListener('click', () => {
+        openExplorer(saveFolder, err => {
+            console.log(err);
         })
     })
 
@@ -50,6 +70,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }).then(result => {
             if (!result.canceled) {
                 openFilesResult = result.filePaths
+
+                // Updating info about opened files
+                let infoString = "Opened " + result.filePaths.length + " file"
+                if (result.filePaths.length > 1) {
+                    infoString += 's'
+                }
+
+                let totalSize = 0
+                openFilesResult.forEach(fileName => {
+                    totalSize += fs.statSync(fileName)['size']
+                })
+
+                filesOpenedP.innerText = infoString + ". Total size: " + (totalSize / 1e6).toFixed(2) + " MB"
             }
         }).catch(err => {
             console.log(err)
@@ -63,6 +96,8 @@ document.addEventListener('DOMContentLoaded', function () {
             openFilesResult.forEach(fileName => {
                 sendFile(IP, fileName)
             })
+            openFilesResult = []
+            filesOpenedP.innerText = ""
         } else {
             // TODO consider output to user
             console.log("Invalid IP")
