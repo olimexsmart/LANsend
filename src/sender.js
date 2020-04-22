@@ -1,14 +1,12 @@
-function sendFile(IP, fileName) {
+function sendFiles(IP, fileNames, totSize) {
 
-  // Preparing data to be sent
-  const stats = fs.statSync(fileName)
-  const fileSizeInBytes = stats['size']
+  // Preparing request notifing receiver that we want 
   const data = JSON.stringify({
-    filename: path.basename(fileName),
-    size: fileSizeInBytes
+    nFiles: fileNames.length,
+    totSize: totSize
   })
 
-  // Create HTTP POST request
+  // Create HTTP start POST request
   const httpClient = http.request({
     host: IP,
     port: 11861,
@@ -18,33 +16,78 @@ function sendFile(IP, fileName) {
       'Content-Length': data.length
     }
   }, response => {
-
     // Intercept response data
     let body = []
     response.on('data', chunk => {
       body.push(chunk);
     })
-    response.on('end', () => {
-      body = Buffer.concat(body).toString()
-      const socket = net.connect(parseInt(body), IP)
+    response.on('end', async () => {
+      // TODO this string could contain some errors
+      // HTTP port of our private server managing this transfer
+      let transferServerPort = Buffer.concat(body).toString()
 
-      socket.on('error', error => {
-        console.log(error)
-      })
+      // Send file one by one
+      for (let f = 0; f < fileNames.length; ++f) {
+        // Tell the receiver the name of the file we are about to send
+        let transferData = JSON.stringify({
+          fileName: path.basename(fileNames[f])
+        })
 
-      // Open file to send
-      const fileStream = fs.createReadStream(fileName);
+        // Wait until this file is sent
+        await new Promise((resolve, reject) => {
+          // Ask for port where to send this file 
+          const transferClient = http.request({
+            host: IP,
+            port: transferServerPort,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': transferData.length
+            }
+          }, response => {
+            // Here we are receiving the port of the socket to send data to
+            let body = []
+            response.on('data', chunk => {
+              body.push(chunk);
+            })
+            response.on('end', () => {
+              // Port opened by the receiver listening for our data
+              let port = parseInt(Buffer.concat(body).toString())
+              
+              const socket = net.connect(port, IP)
 
-      // Send file
-      fileStream.on('open', () => {
-        // This just pipes the read stream to the socket, closing it too
-        fileStream.pipe(socket);
-      });
+              socket.on('error', error => {
+                console.log(error)
+                reject(error)
+              })
 
-      // Socket closed automagically upon receiving FIN
-      socket.on('close', () => {
-        console.log("Socket closed")
-      })
+              // Open file to send
+              const fileStream = fs.createReadStream(fileNames[f]);
+
+              // Send file
+              fileStream.on('open', () => {
+                // This just pipes the read stream to the socket, closing it too
+                fileStream.pipe(socket);
+              });
+
+              // Socket closed automagically upon receiving FIN
+              socket.on('close', () => {
+                console.log("Socket closed")
+                resolve()
+              })
+
+            })
+          })
+
+          transferClient.on('error', error => {
+            console.log(error)
+          })
+
+          // Send the request for this file
+          transferClient.write(transferData)
+          transferClient.end()
+        })
+      }
     })
   })
 

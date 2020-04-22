@@ -14,7 +14,7 @@ console.log("bomber")
 // Used in other files too
 var saveFolder = ""
 var freeDiskSpace = 0
-var progress
+// var progress
 
 var nReceiving = 0
 var nSending = 0
@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     var openFilesResult = []
+    var totalSize = 0
 
     // Update IP address of this machine
     yourIPP.innerText = "Your IP is: " + ipUtils.address()
@@ -77,10 +78,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     infoString += 's'
                 }
 
-                let totalSize = 0
-                openFilesResult.forEach(fileName => {
-                    totalSize += fs.statSync(fileName)['size']
-                })
+                totalSize = 0
+                for(let k = 0; k < openFilesResult.length; ++k) {
+                    totalSize += fs.statSync(openFilesResult[k])['size']
+                }
 
                 filesOpenedP.innerText = infoString + ". Total size: " + (totalSize / 1e6).toFixed(2) + " MB"
             }
@@ -93,9 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
     sendBtn.addEventListener('click', () => {
         const IP = IPInput.value
         if (net.isIPv4(IP)) {
-            openFilesResult.forEach(fileName => {
-                sendFile(IP, fileName)
-            })
+            sendFiles(IP, openFilesResult, totalSize)
             openFilesResult = []
             filesOpenedP.innerText = ""
         } else {
