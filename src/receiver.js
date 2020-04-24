@@ -65,7 +65,7 @@ const httpServer = http.createServer((request, response) => {
             // Close server when file is sent
             socket.on('end', () => {
                 clearInterval(progressChecker)
-                pu.fileTransfered()
+                pu.fileTransfered(fileStream.bytesWritten)
                 // If all the file were received, close server
                 if (f >= nFiles) {
                     pu.transferDone()
