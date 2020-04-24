@@ -19,6 +19,9 @@ const httpServer = http.createServer((request, response) => {
         const totSize = data.totSize
         const nFiles = fileBaseNames.length
 
+        const pu = new ProgressUpdater(nFiles, totSize)
+        pu.transferStart()
+
         // Check if there is enough space to receive the file
         // TODO we need to know where we are saving the file first
 
@@ -31,6 +34,7 @@ const httpServer = http.createServer((request, response) => {
         const server = net.createServer()
 
         let f = 0 // Counter of how many file were received
+        let checkInactiveHandle = 0
         // Write on file received data
         server.on('connection', socket => {
             // The connections must be incoming only from the sender
@@ -40,32 +44,38 @@ const httpServer = http.createServer((request, response) => {
                 return
             }
 
-            // saveFolder is a global variable
-            let filePath = saveFolder + '/' + fileBaseNames[f]
-            f++
+            // No need to check server if there is a valid incoming connection
+            clearTimeout(checkInactiveHandle)
+
             // saveFolder is a global variable defined in logic.js
+            let filePath = saveFolder + '/' + fileBaseNames[f]
             let fileStream = fs.createWriteStream(filePath);
-            //let progressChecker = null
+            let progressChecker = null
+            f++
 
             fileStream.on('ready', () => {
                 socket.pipe(fileStream);
 
-                // progressChecker = setInterval(fileStreamToCheck => {
-                //     progress = fileStreamToCheck.bytesWritten / size
-                //     // This needs to be updated in GUI
-                //     console.log(progress)
-                // }, 200, fileStream)
+                progressChecker = setInterval((fileStreamToCheck, pu) => {
+                    pu.updateProgress(fileStreamToCheck.bytesWritten)
+                    console.log(pu.summaryString())
+                }, 500, fileStream, pu)
             })
 
             // Close server when file is sent
             socket.on('end', () => {
-                //clearInterval(progressChecker)
-
+                clearInterval(progressChecker)
+                pu.fileTransfered()
                 // If all the file were received, close server
                 if (f >= nFiles) {
+                    pu.transferDone()
+                    console.log(pu.doneString())
                     server.close(() => {
                         console.log("Server closed")
                     })
+                } else {
+                    // Set a callback to close server if no file were sent
+                    checkInactiveHandle = setTimeout(checkInactiveServer, 3000, server)
                 }
             })
         })
@@ -83,7 +93,7 @@ const httpServer = http.createServer((request, response) => {
             response.end(server.address().port.toString());
 
             // Set a callback to close server if no file were sent
-            setTimeout(checkInactiveServer, 3000, server)
+            checkInactiveHandle = setTimeout(checkInactiveServer, 3000, server)
         });
     })
 })
