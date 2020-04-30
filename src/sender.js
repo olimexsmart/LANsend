@@ -1,5 +1,7 @@
 function sendFiles(IP, fileNames, totSize) {
 
+  const pu = new ProgressUpdater(fileNames.length, totSize, 0)
+
   // Preparing request notifing receiver that we want 
   let fileBaseNames = []
   for (let f = 0; f < fileNames.length; ++f) {
@@ -28,6 +30,7 @@ function sendFiles(IP, fileNames, totSize) {
     response.on('end', async () => {
       // TODO this string could contain some errors
       let port = parseInt(Buffer.concat(body).toString())
+      pu.transferStart()
 
       // Send file one by one
       for (let f = 0; f < fileNames.length; ++f) {
@@ -42,20 +45,30 @@ function sendFiles(IP, fileNames, totSize) {
 
           // Open file to send
           const fileStream = fs.createReadStream(fileNames[f]);
+          let progressChecker = null
 
           // Send file
           fileStream.on('open', () => {
             // This just pipes the read stream to the socket, closing it too
             fileStream.pipe(socket);
+            progressChecker = setInterval((fileStreamToCheck, pu) => {
+              pu.updateProgress(fileStreamToCheck.bytesRead)
+              console.log(pu.summaryString())
+            }, 500, fileStream, pu)
           });
 
           // Socket closed automagically upon receiving FIN
           socket.on('close', () => {
             console.log("Socket closed")
+            clearInterval(progressChecker)
+            pu.fileTransfered(fileStream.bytesRead)
             resolve()
           })
         })
       }
+
+      pu.transferDone()
+      console.log(pu.doneString())
     })
   })
 

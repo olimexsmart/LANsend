@@ -19,7 +19,7 @@ const httpServer = http.createServer((request, response) => {
         const totSize = data.totSize
         const nFiles = fileBaseNames.length
 
-        const pu = new ProgressUpdater(nFiles, totSize)
+        const pu = new ProgressUpdater(nFiles, totSize, 1)
         pu.transferStart()
 
         // Check if there is enough space to receive the file

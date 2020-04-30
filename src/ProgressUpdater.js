@@ -98,12 +98,12 @@ class ProgressUpdater {
 
     // To print on console
     summaryString() {
-        return `${this.totProgress} ${this.fileProgress}/${this.nFiles} ${this.formatSize(this.currentSpeed)}/s ${this.ETA}s`
+        return `${this.direction} ${this.totProgress} ${this.fileProgress}/${this.nFiles} ${this.formatSize(this.currentSpeed)}/s ${this.ETA}s`
     }
 
     // Final print
     doneString() {
-        return `${this.formatSize(this.totBytes)} ${this.formatSize(this.finalSpeed)}/s`
+        return `${this.directed} ${this.formatSize(this.totBytes)} ${this.formatSize(this.finalSpeed)}/s`
     }
 
     //////////////////////////////////
@@ -136,19 +136,18 @@ class ProgressUpdater {
 
     // Used ad construction to create HTML elements
     appendHTML() {
-        let hash = `${this.totSize}${Date.now()}`
+        //let hash = this.hashString(`${this.totSize}${Date.now()}`)
+        let hash = Date.now().toString()
+        this.childP = document.createElement('div');
+        this.defaultParent.appendChild(this.childP);
         let htmlCode = `
-        <div id="${hash}">
             <p id="${hash}line1"></p>
             <p id="${hash}line2"></p>
             <progress id="${hash}prog" value="0" max="100"></progress>
-        </div>
-        <hr>
-        `
+        <hr>`
 
-        this.defaultParent.innerHTML += htmlCode
+        this.childP.innerHTML = htmlCode
 
-        this.childP = document.getElementById(`${hash}`)
         this.line1P = document.getElementById(`${hash}line1`)
         this.line2P = document.getElementById(`${hash}line2`)
         this.progProg = document.getElementById(`${hash}prog`)
