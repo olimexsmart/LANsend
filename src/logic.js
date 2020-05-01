@@ -7,6 +7,9 @@ const { dialog } = require('electron').remote
 const downloadsFolder = require('downloads-folder');
 const ipUtils = require('ip');
 const openExplorer = require('open-file-explorer');
+const evilscan = require('evilscan');
+const dns = require('dns')
+
 
 
 console.log("bomber")
@@ -28,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const yourIPP = document.getElementById('yourIP')
     const showFolderBtn = document.getElementById('showFolder')
     const filesOpenedP = document.getElementById('filesOpened')
+    const listDestIPSel = document.getElementById('listDestIP')
 
 
     var openFilesResult = []
@@ -79,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 totalSize = 0
-                for(let k = 0; k < openFilesResult.length; ++k) {
+                for (let k = 0; k < openFilesResult.length; ++k) {
                     totalSize += fs.statSync(openFilesResult[k])['size']
                 }
 
@@ -115,20 +119,44 @@ document.addEventListener('DOMContentLoaded', function () {
     // Check IP the first time manually
     IPInput.dispatchEvent(new Event('keyup'))
 
-    // Update available disk space
-    setInterval(() => {
-        nodeDiskInfo.getDiskInfo()
-            .then(disks => {
-                for (let d = 0; d < disks.length; d++) {
-                    const element = disks[d];
-                    if (saveFolder[0] == disks[d].mounted[0]) {
-                        freeDiskSpace = disks[d].available
-                    }
-                }
-            })
-            .catch(reason => {
-                console.error(reason);
-            })
-    }, 1000)
+    // Write in input selected IP
+    listDestIPSel.addEventListener('click', (ev) => {
+        let selected = listDestIPSel.options[listDestIPSel.selectedIndex]
+        if (selected.value == 'nofound') {
+            return
+        }
+        IPInput.value = selected.text
+        IPInput.dispatchEvent(new Event('keyup'))
+    })
+
+    // Periodic operations
+    setInterval( () => {
+        checkSpace()
+
+        // Update list of active hosts
+        scanPorts(listDestIPSel)
+    }, 10000)
+    // Do it once at launch
+    scanPorts(listDestIPSel)
+    checkSpace()
+
 
 }, false);
+
+function checkSpace() {
+    // Update available disk space
+    nodeDiskInfo.getDiskInfo()
+    .then(disks => {
+        for (let d = 0; d < disks.length; d++) {
+            const element = disks[d];
+            if (saveFolder[0] == disks[d].mounted[0] && disks[d].mounted.length < 3) {
+                freeDiskSpace = disks[d].available
+                console.log(freeDiskSpace)
+                // TODO HTML element for this to wrie in
+            }
+        }
+    })
+    .catch(reason => {
+        console.error(reason);
+    })
+}

@@ -140,6 +140,7 @@ class ProgressUpdater {
         let hash = Date.now().toString()
         this.childP = document.createElement('div');
         this.defaultParent.appendChild(this.childP);
+        // TODO start with hidden status
         let htmlCode = `
             <p id="${hash}line1"></p>
             <p id="${hash}line2"></p>

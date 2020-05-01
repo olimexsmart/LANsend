@@ -10,6 +10,7 @@
   <script src="ProgressUpdater.js"></script>
   <script src="sender.js"></script>
   <script src="receiver.js"></script>
+  <script src="portScanning.js"></script>
 </head>
 
 <body>
@@ -17,7 +18,11 @@
   <hr>
   <label for="destIP">Destination IP:</label>
   <!-- <input id="destIP" type="text" value="192.168.1.x"> -->
-  <input id="destIP" type="text" value="127.0.0.1">
+  <input list="listDestIP" id="destIP" type="text" value="127.0.0.1">
+  <!-- TODO: select of possible ips with refresh button -->
+  <select id="listDestIP">
+    <option value="nofound">No IPs found</option>
+  </select>
   <br>
   <button id="openFile">
     Open Files

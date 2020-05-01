@@ -47,6 +47,7 @@
   "dependencies": {
     "downloads-folder": "^1.0.2",
     "electron-squirrel-startup": "^1.0.0",
+    "evilscan": "^1.7.5",
     "ip": "^1.1.5",
     "node-disk-info": "^1.0.4",
     "open-file-explorer": "^1.0.2"
