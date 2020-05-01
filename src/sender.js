@@ -22,6 +22,15 @@ function sendFiles(IP, fileNames, totSize) {
       'Content-Length': data.length
     }
   }, response => {
+    // Intercept errors
+    if (response.statusCode != 200) {
+      switch (response.statusCode) {
+        case 507:
+          alert("Selected device has not enough space")
+          return
+      }
+    }
+
     // Intercept response data
     let body = []
     response.on('data', chunk => {

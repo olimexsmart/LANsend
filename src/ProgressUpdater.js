@@ -83,7 +83,7 @@ class ProgressUpdater {
     }
 
     // Reduce to bigger units
-    formatSize(nBytes) {
+    static formatSize(nBytes) {
         if (nBytes > 1e9)
             return (nBytes / 1e9).toFixed(1).toString() + 'GB'
 
@@ -98,12 +98,12 @@ class ProgressUpdater {
 
     // To print on console
     summaryString() {
-        return `${this.direction} ${this.totProgress} ${this.fileProgress}/${this.nFiles} ${this.formatSize(this.currentSpeed)}/s ${this.ETA}s`
+        return `${this.direction} ${this.totProgress} ${this.fileProgress}/${this.nFiles} ${ProgressUpdater.formatSize(this.currentSpeed)}/s ${this.ETA}s`
     }
 
     // Final print
     doneString() {
-        return `${this.directed} ${this.formatSize(this.totBytes)} ${this.formatSize(this.finalSpeed)}/s`
+        return `${this.directed} ${ProgressUpdater.formatSize(this.totBytes)} ${ProgressUpdater.formatSize(this.finalSpeed)}/s`
     }
 
     //////////////////////////////////
@@ -125,11 +125,11 @@ class ProgressUpdater {
     updateHTML(completed) {
         if (!completed) {
             this.line1P.innerText = `${this.direction} ${this.fileProgress} of ${this.nFiles}`
-            this.line2P.innerText = `${this.formatSize(this.totBytes)}/${this.formatSize(this.totSize)}   ${this.formatSize(this.currentSpeed)}/s   ${this.ETA}s`
+            this.line2P.innerText = `${ProgressUpdater.formatSize(this.totBytes)}/${ProgressUpdater.formatSize(this.totSize)}   ${ProgressUpdater.formatSize(this.currentSpeed)}/s   ${this.ETA}s`
             this.progProg.value = Math.floor(this.totProgress * 100)
         } else {
             this.line1P.innerText = `${this.directed} ${this.fileProgress} of ${this.nFiles}`
-            this.line2P.innerText = `${this.formatSize(this.totBytes)}/${this.formatSize(this.totSize)}   ${this.formatSize(this.finalSpeed)}/s   ${this.totTime}s`
+            this.line2P.innerText = `${ProgressUpdater.formatSize(this.totBytes)}/${ProgressUpdater.formatSize(this.totSize)}   ${ProgressUpdater.formatSize(this.finalSpeed)}/s   ${this.totTime}s`
             this.progProg.value = 100
         }
     }

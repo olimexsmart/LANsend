@@ -19,16 +19,16 @@ const httpServer = http.createServer((request, response) => {
         const totSize = data.totSize
         const nFiles = fileBaseNames.length
 
+        // Check if there is enough space to receive the file
+        if (totSize > freeDiskSpace * 0.95) {
+            alert("Not enough space to accept incoming data")
+            response.writeHead(507)
+            response.end()
+            return
+        }
+
         const pu = new ProgressUpdater(nFiles, totSize, 1)
         pu.transferStart()
-
-        // Check if there is enough space to receive the file
-        // TODO we need to know where we are saving the file first
-
-        // Create HTTP server that will handle this transfer
-        // Count how many file we have received so far
-
-
 
         // Create the server that will listen for the incoming file
         const server = net.createServer()
@@ -89,8 +89,8 @@ const httpServer = http.createServer((request, response) => {
         }, () => {
             // When the server is initialized
             // send the HTTP response with the port choosen
-            response.writeHead(200);
-            response.end(server.address().port.toString());
+            response.writeHead(200)
+            response.end(server.address().port.toString())
 
             // Set a callback to close server if no file were sent
             checkInactiveHandle = setTimeout(checkInactiveServer, 3000, server)

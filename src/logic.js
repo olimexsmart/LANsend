@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const showFolderBtn = document.getElementById('showFolder')
     const filesOpenedP = document.getElementById('filesOpened')
     const listDestIPSel = document.getElementById('listDestIP')
+    const freeSpaceP = document.getElementById('freeSpace')
 
 
     var openFilesResult = []
@@ -87,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     totalSize += fs.statSync(openFilesResult[k])['size']
                 }
 
-                filesOpenedP.innerText = infoString + ". Total size: " + (totalSize / 1e6).toFixed(2) + " MB"
+                filesOpenedP.innerText = infoString + ". Total size: " + ProgressUpdater.formatSize(totalSize)
             }
         }).catch(err => {
             console.log(err)
@@ -131,28 +132,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Periodic operations
     setInterval( () => {
-        checkSpace()
+        checkSpace(freeSpaceP)
 
         // Update list of active hosts
         scanPorts(listDestIPSel)
     }, 10000)
     // Do it once at launch
     scanPorts(listDestIPSel)
-    checkSpace()
+    checkSpace(freeSpaceP)
 
 
 }, false);
 
-function checkSpace() {
+function checkSpace(textBox) {
     // Update available disk space
     nodeDiskInfo.getDiskInfo()
     .then(disks => {
         for (let d = 0; d < disks.length; d++) {
             const element = disks[d];
             if (saveFolder[0] == disks[d].mounted[0] && disks[d].mounted.length < 3) {
-                freeDiskSpace = disks[d].available
-                console.log(freeDiskSpace)
-                // TODO HTML element for this to wrie in
+                freeDiskSpace = disks[d].available * 1e3
+                textBox.innerText = "Free space: " + ProgressUpdater.formatSize(freeDiskSpace)
             }
         }
     })
