@@ -63,7 +63,7 @@ function sendFiles(IP, fileNames, totSize) {
             progressChecker = setInterval((fileStreamToCheck, pu) => {
               pu.updateProgress(fileStreamToCheck.bytesRead)
               console.log(pu.summaryString())
-            }, 500, fileStream, pu)
+            }, 1000, fileStream, pu)
           });
 
           // Socket closed automagically upon receiving FIN

@@ -2,7 +2,8 @@ class ProgressUpdater {
     constructor(nFiles, totSize, direction) {
         this.nFiles = nFiles
         this.totSize = totSize
-        if (direction == 0) {
+        this.directionCode = direction
+        if (direction === 0) {
             this.direction = "Sending"
             this.directed = "Sent"
         }
@@ -36,6 +37,23 @@ class ProgressUpdater {
         this.appendHTML()
     }
 
+    // Static properties used as globals
+    // Variable declaration at EOF
+    static get TotReceived() {
+        return ProgressUpdater.totReceived
+    }
+
+    static get TotSent() {
+        return ProgressUpdater.totSent
+    }
+
+    static set TotReceived(bytes) {
+        ProgressUpdater.totReceived += bytes
+    }
+
+    static set TotSent(bytes) {
+        ProgressUpdater.totSent += bytes
+    }
 
 
     // Update from file streams
@@ -52,6 +70,12 @@ class ProgressUpdater {
         this.totProgress = this.totBytes / this.totSize
 
         this.updateHTML(false)
+
+        if (this.directionCode === 0) {
+            ProgressUpdater.TotSent = deltaBytes
+        } else {
+            ProgressUpdater.TotReceived = deltaBytes
+        }
     }
 
     // Called before transfer starts
@@ -70,7 +94,6 @@ class ProgressUpdater {
     transferDone() {
         this.totTime = (Date.now() - this.startTime) / 1000
         this.finalSpeed = this.totBytes / this.totTime
-
         this.updateHTML(true)
     }
 
@@ -110,7 +133,7 @@ class ProgressUpdater {
 
     hashString(s) {
         var hash = 0;
-        if (s.length == 0) {
+        if (s.length === 0) {
             return hash;
         }
         for (var i = 0; i < s.length; i++) {
@@ -159,3 +182,7 @@ class ProgressUpdater {
         this.defaultParent.removeChild(this.childP)
     }
 }
+
+// Definition of static fields (waiting for new JS version)
+ProgressUpdater.totReceived = 0
+ProgressUpdater.totSent = 0

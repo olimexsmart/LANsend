@@ -20,12 +20,12 @@ function scanPorts(selectElement) {
         let tempIP = data.ip
         dns.reverse(data.ip, (err, hostname) => {
             // Empty options before adding new elements
-            if (nIP == 0) {
+            if (nIP === 0) {
                 while (selectElement.firstChild) {
                     selectElement.removeChild(selectElement.firstChild)
                 }
             }
-
+            // TODO resolve concurrency with done event about removing elements
             nIP++
 
             if (hostname != undefined) {
@@ -36,7 +36,7 @@ function scanPorts(selectElement) {
 
             // Add option to select
             let tOpt = document.createElement('option');
-            tOpt.value = tempIP
+            tOpt.value = data.ip
             tOpt.text = tempIP
             selectElement.appendChild(tOpt);
         })
@@ -50,7 +50,7 @@ function scanPorts(selectElement) {
 
     scanner.on('done', () => {
         // If nothing found, replace with text
-        if (nIP == 0) {
+        if (nIP === 0) {
             while (selectElement.firstChild) {
                 selectElement.removeChild(selectElement.firstChild)
             }

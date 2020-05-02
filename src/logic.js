@@ -10,17 +10,12 @@ const openExplorer = require('open-file-explorer');
 const evilscan = require('evilscan');
 const dns = require('dns')
 
-
-
 console.log("bomber")
 
 // Used in other files too
 var saveFolder = ""
 var freeDiskSpace = 0
-// var progress
 
-var nReceiving = 0
-var nSending = 0
 
 document.addEventListener('DOMContentLoaded', function () {
     const fileManagerBtn = document.getElementById('openFile')
@@ -126,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (selected.value == 'nofound') {
             return
         }
-        IPInput.value = selected.text
+        IPInput.value = selected.value
         IPInput.dispatchEvent(new Event('keyup'))
     })
 

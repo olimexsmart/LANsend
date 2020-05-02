@@ -59,7 +59,7 @@ const httpServer = http.createServer((request, response) => {
                 progressChecker = setInterval((fileStreamToCheck, pu) => {
                     pu.updateProgress(fileStreamToCheck.bytesWritten)
                     console.log(pu.summaryString())
-                }, 500, fileStream, pu)
+                }, 1000, fileStream, pu)
             })
 
             // Close server when file is sent
