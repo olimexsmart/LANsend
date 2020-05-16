@@ -16,6 +16,7 @@ const httpServer = http.createServer((request, response) => {
         // Number of file sent and total size
         const data = JSON.parse(Buffer.concat(body).toString())
         const fileBaseNames = data.fileBaseNames
+        const checksums = data.checksums
         const totSize = data.totSize
         const nFiles = fileBaseNames.length
 
@@ -57,14 +58,31 @@ const httpServer = http.createServer((request, response) => {
                 socket.pipe(fileStream);
 
                 progressChecker = setInterval((fileStreamToCheck, pu) => {
-                    pu.updateProgress(fileStreamToCheck.bytesWritten)
-                    console.log(pu.summaryString())
-                }, 1000, fileStream, pu)
+                    let res = pu.updateProgress(fileStreamToCheck.bytesWritten)
+                    if (res) {
+                        socket.destroy()
+                    }
+                    console.log(pu.summaryString() + res.toString())
+                }, 500, fileStream, pu)
             })
 
             // Close server when file is sent
             socket.on('end', () => {
                 clearInterval(progressChecker)
+                
+                // Checking file checksum
+                let file_buffer = fs.readFileSync(filePath);
+                let sum = crypto.createHash('sha256');
+                sum.update(file_buffer);
+                const hex = sum.digest('hex');
+
+                if(hex != checksums[f - 1]) {
+                    console.error("Checksum error: " + hex + "!=" + checksums[f]);
+                    server.close(() => {
+                        console.log("Server closed")
+                    })
+                }
+
                 pu.fileTransfered(fileStream.bytesWritten)
                 // If all the file were received, close server
                 if (f >= nFiles) {
@@ -114,3 +132,9 @@ function checkInactiveServer(serverToClose) {
 }
 
 
+
+
+
+function generateChecksum(str, algorithm, encoding) {
+    return
+}

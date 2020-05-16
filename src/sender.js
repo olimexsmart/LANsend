@@ -4,11 +4,19 @@ function sendFiles(IP, fileNames, totSize) {
 
   // Preparing request notifing receiver that we want 
   let fileBaseNames = []
+  let checksums = []
   for (let f = 0; f < fileNames.length; ++f) {
     fileBaseNames.push(path.basename(fileNames[f]))
+    // Create file checksums
+    let file_buffer = fs.readFileSync(fileNames[f]);
+    let sum = crypto.createHash('sha256');
+    sum.update(file_buffer);
+    checksums.push(sum.digest('hex'));
   }
+
   const data = JSON.stringify({
     fileBaseNames: fileBaseNames,
+    checksums: checksums,
     totSize: totSize
   })
 
@@ -63,7 +71,7 @@ function sendFiles(IP, fileNames, totSize) {
             progressChecker = setInterval((fileStreamToCheck, pu) => {
               pu.updateProgress(fileStreamToCheck.bytesRead)
               console.log(pu.summaryString())
-            }, 1000, fileStream, pu)
+            }, 500, fileStream, pu)
           });
 
           // Socket closed automagically upon receiving FIN

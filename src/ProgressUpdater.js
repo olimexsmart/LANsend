@@ -33,6 +33,9 @@ class ProgressUpdater {
         this.line1P = undefined
         this.line2P = undefined
         this.progProg = undefined
+        this.cancBtn = undefined
+
+        this.cancelTransfer = false;
 
         this.appendHTML()
     }
@@ -76,6 +79,8 @@ class ProgressUpdater {
         } else {
             ProgressUpdater.TotReceived = deltaBytes
         }
+
+        return this.cancelTransfer
     }
 
     // Called before transfer starts
@@ -95,6 +100,10 @@ class ProgressUpdater {
         this.totTime = (Date.now() - this.startTime) / 1000
         this.finalSpeed = this.totBytes / this.totTime
         this.updateHTML(true)
+    }
+
+    checkCompleteTransfer(finalBytes, fileSize) {
+        return (this.currentBytes + finalBytes) == fileSize
     }
 
     // Confirm transfer of a file
@@ -168,6 +177,7 @@ class ProgressUpdater {
             <p id="${hash}line1"></p>
             <p id="${hash}line2"></p>
             <progress id="${hash}prog" value="0" max="100"></progress>
+            <button id="${hash}btn">Cancel</button>
         <hr>`
 
         this.childP.innerHTML = htmlCode
@@ -175,11 +185,18 @@ class ProgressUpdater {
         this.line1P = document.getElementById(`${hash}line1`)
         this.line2P = document.getElementById(`${hash}line2`)
         this.progProg = document.getElementById(`${hash}prog`)
+        this.cancBtn = document.getElementById(`${hash}btn`)
+        this.cancBtn.addEventListener('click', this.cancelCallback.bind(this))
     }
 
     // Used to remove HTML elements
     removeHTML() {
         this.defaultParent.removeChild(this.childP)
+    }
+
+    cancelCallback() {
+        this.cancelTransfer = true;
+        console.log('cacel clicked')
     }
 }
 

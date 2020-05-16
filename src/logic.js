@@ -9,6 +9,8 @@ const ipUtils = require('ip');
 const openExplorer = require('open-file-explorer');
 const evilscan = require('evilscan');
 const dns = require('dns')
+const crypto = require('crypto');
+
 
 console.log("bomber")
 
@@ -144,7 +146,6 @@ function checkSpace(textBox) {
     nodeDiskInfo.getDiskInfo()
     .then(disks => {
         for (let d = 0; d < disks.length; d++) {
-            const element = disks[d];
             if (saveFolder[0] == disks[d].mounted[0] && disks[d].mounted.length < 3) {
                 freeDiskSpace = disks[d].available * 1e3
                 textBox.innerText = "Free space: " + ProgressUpdater.formatSize(freeDiskSpace)
