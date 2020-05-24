@@ -58,26 +58,32 @@ const httpServer = http.createServer((request, response) => {
                 socket.pipe(fileStream);
 
                 progressChecker = setInterval((fileStreamToCheck, pu) => {
-                    let res = pu.updateProgress(fileStreamToCheck.bytesWritten)
-                    if (res) {
+                    const needToCancel = pu.updateProgress(fileStreamToCheck.bytesWritten)
+                    if (needToCancel) {
                         socket.destroy()
+                        clearInterval(progressChecker)
+                        server.close(() => {
+                            console.log("Server closed in cancellation")
+                        })
                     }
-                    console.log(pu.summaryString() + res.toString())
+                    console.log(pu.summaryString() + needToCancel.toString())
                 }, 500, fileStream, pu)
             })
 
             // Close server when file is sent
             socket.on('end', () => {
                 clearInterval(progressChecker)
-                
+
                 // Checking file checksum
+                // FIXME this needs to be async because of max buffer limits
                 let file_buffer = fs.readFileSync(filePath);
                 let sum = crypto.createHash('sha256');
                 sum.update(file_buffer);
                 const hex = sum.digest('hex');
 
-                if(hex != checksums[f - 1]) {
+                if (hex != checksums[f - 1]) {
                     console.error("Checksum error: " + hex + "!=" + checksums[f]);
+                    // TODO tell something to the user
                     server.close(() => {
                         console.log("Server closed")
                     })

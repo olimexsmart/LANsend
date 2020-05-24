@@ -174,8 +174,8 @@ class ProgressUpdater {
         this.defaultParent.appendChild(this.childP);
         // TODO start with hidden status
         let htmlCode = `
-            <p id="${hash}line1"></p>
-            <p id="${hash}line2"></p>
+            <p id="${hash}line1">Starting transfer</p>
+            <p id="${hash}line2">-   -   -</p>
             <progress id="${hash}prog" value="0" max="100"></progress>
             <button id="${hash}btn">Cancel</button>
         <hr>`
@@ -196,7 +196,6 @@ class ProgressUpdater {
 
     cancelCallback() {
         this.cancelTransfer = true;
-        console.log('cacel clicked')
     }
 }
 

@@ -20,7 +20,8 @@ var freeDiskSpace = 0
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    const fileManagerBtn = document.getElementById('openFile')
+    const fileOpenBtn = document.getElementById('openFile')
+    const directoryOpenBtn = document.getElementById('openDirectory')
     const sendBtn = document.getElementById('send')
     const IPInput = document.getElementById('destIP')
     const pathP = document.getElementById('savePath')
@@ -67,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 
     // Open choose file dialog
-    fileManagerBtn.addEventListener('click', () => {
+    fileOpenBtn.addEventListener('click', () => {
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections']
         }).then(result => {
@@ -88,9 +89,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 filesOpenedP.innerText = infoString + ". Total size: " + ProgressUpdater.formatSize(totalSize)
             }
         }).catch(err => {
-            console.log(err)
+            console.error(err)
         })
     })
+
+    // directoryOpenBtn.addEventListener('click', () => {
+    //     dialog.showOpenDialog({
+    //         properties: ['openDirectory']
+    //     }).then(result => {
+    //         if(!result.canceled) {
+    //             console.log(result)
+    //         }
+    //     }).catch(err => {
+    //         console.error(err)
+    //     })
+    // })
 
     // Send file
     sendBtn.addEventListener('click', () => {
