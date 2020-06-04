@@ -1,4 +1,4 @@
-function sendFiles(IP, fileNames, totSize) {
+async function sendFiles(IP, fileNames, totSize) {
 
   const pu = new ProgressUpdater(fileNames.length, totSize, 0)
 
@@ -7,11 +7,11 @@ function sendFiles(IP, fileNames, totSize) {
   let checksums = []
   for (let f = 0; f < fileNames.length; ++f) {
     fileBaseNames.push(path.basename(fileNames[f]))
+
     // Create file checksums
-    let file_buffer = fs.readFileSync(fileNames[f]);
-    let sum = crypto.createHash('sha256');
-    sum.update(file_buffer);
-    checksums.push(sum.digest('hex'));
+    let hash = await getChecksum(fileNames[f])
+
+    checksums.push(hash);
   }
 
   const data = JSON.stringify({

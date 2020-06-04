@@ -71,25 +71,22 @@ const httpServer = http.createServer((request, response) => {
             })
 
             // Close server when file is sent
-            socket.on('end', () => {
+            socket.on('end', async () => {
                 clearInterval(progressChecker)
 
-                // Checking file checksum
-                // FIXME this needs to be async because of max buffer limits
-                let file_buffer = fs.readFileSync(filePath);
-                let sum = crypto.createHash('sha256');
-                sum.update(file_buffer);
-                const hex = sum.digest('hex');
+                pu.fileTransfered(fileStream.bytesWritten)
 
-                if (hex != checksums[f - 1]) {
-                    console.error("Checksum error: " + hex + "!=" + checksums[f]);
+                // Checking file checksum
+                let hash = await getChecksum(filePath)
+
+                if (hash != checksums[f - 1]) {
+                    console.error("Checksum error: " + hash + "!=" + checksums[f]);
                     // TODO tell something to the user
                     server.close(() => {
                         console.log("Server closed")
                     })
                 }
 
-                pu.fileTransfered(fileStream.bytesWritten)
                 // If all the file were received, close server
                 if (f >= nFiles) {
                     pu.transferDone()

@@ -9,7 +9,6 @@ const ipUtils = require('ip');
 const openExplorer = require('open-file-explorer');
 const evilscan = require('evilscan');
 const dns = require('dns')
-const crypto = require('crypto');
 
 
 console.log("bomber")
